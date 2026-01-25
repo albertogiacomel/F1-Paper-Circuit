@@ -17,7 +17,7 @@ export function EventModal({ isOpen, type, eventKey, rollValue, onClose, languag
   
   useEffect(() => {
     if (isOpen) {
-        let timer: NodeJS.Timeout;
+        let timer: ReturnType<typeof setTimeout>;
 
         // Auto-close Dice modal after 2 seconds
         if (type === 'DICE') {
