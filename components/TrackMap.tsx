@@ -1,12 +1,13 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { Wrench, AlertTriangle, Zap, Flag } from 'lucide-react';
-import { PlayerState, Language, TrackDefinition } from '../types/index';
+import { PlayerState, Language, TrackDefinition, PlayerId } from '../types/index';
 import { TRANSLATIONS } from '../i18n/translations';
 
 interface TrackMapProps {
   p1: PlayerState;
   p2: PlayerState;
+  winner: PlayerId | null;
   isDarkMode: boolean;
   language: Language;
   map: TrackDefinition; 
@@ -67,7 +68,7 @@ const F1CarIcon = ({ color, borderColor }: { color: string, borderColor: string 
   </g>
 );
 
-export function TrackMap({ p1, p2, isDarkMode, language, map }: TrackMapProps) {
+export function TrackMap({ p1, p2, winner, isDarkMode, language, map }: TrackMapProps) {
   const t = TRANSLATIONS[language];
   const { path: TRACK_PATH, pitStops: PIT_STOPS, dangerZones: DANGER_ZONES, drsZones: DRS_ZONES } = map;
   const TOTAL_CELLS = TRACK_PATH.length;
@@ -399,10 +400,12 @@ export function TrackMap({ p1, p2, isDarkMode, language, map }: TrackMapProps) {
                 strokeWidth="2"
              />
              
-             {/* Stylish Icon next to track instead of large text */}
-             <g transform={`translate(0, ${trackWidth/2 + 35}) rotate(-90)`}>
-                 <Flag size={32} className="text-black dark:text-white fill-current" />
-             </g>
+             {/* Stylish Icon next to track - Only show if there is a winner */}
+             {winner && (
+                 <g transform={`translate(0, ${trackWidth/2 + 35}) rotate(-90)`}>
+                     <Flag size={32} className="text-black dark:text-white fill-current animate-bounce" />
+                 </g>
+             )}
           </g>
         )}
 

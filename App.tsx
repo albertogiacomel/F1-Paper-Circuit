@@ -161,7 +161,14 @@ export default function App() {
               `}>
                 <div className="flex-1 w-full h-full p-2 lg:p-6">
                   {/* PASS ACTIVE MAP HERE */}
-                  <TrackMap p1={p1} p2={p2} isDarkMode={isDarkMode} language={language} map={activeMap} />
+                  <TrackMap 
+                     p1={p1} 
+                     p2={p2} 
+                     winner={winner}
+                     isDarkMode={isDarkMode} 
+                     language={language} 
+                     map={activeMap} 
+                  />
                 </div>
                 
                 {winner && (
