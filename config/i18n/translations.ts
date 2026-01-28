@@ -58,7 +58,8 @@ export const TRANSLATIONS: Record<Language, Record<TranslationKey, string>> = {
     log_danger: 'PERICOLO! {player} perde terreno. ⚠️',
     log_move_back: 'Arretra di 1 casella.',
     log_drs: 'DRS ATTIVO! {player} guadagna velocità! ⚡',
-    log_skip_turn: '{player} è ai Box. Salta il turno.'
+    log_skip_turn: '{player} è ai Box. Salta il turno.',
+    log_engine_failure: 'ROTTURA MOTORE! {player} ha fatto troppi fuori giri! 💥'
   },
   en: {
     title: 'F1 PAPER CIRCUIT',
@@ -117,6 +118,7 @@ export const TRANSLATIONS: Record<Language, Record<TranslationKey, string>> = {
     log_danger: 'DANGER! {player} moves back. ⚠️',
     log_move_back: 'Moves back 1 space.',
     log_drs: 'DRS ENABLED! {player} boosts forward! ⚡',
-    log_skip_turn: '{player} is in the Pits. Turn skipped.'
+    log_skip_turn: '{player} is in the Pits. Turn skipped.',
+    log_engine_failure: 'ENGINE BLOWN! {player} pushed too hard! 💥'
   }
 };

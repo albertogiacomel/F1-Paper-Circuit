@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RotateCcw, Trophy, Dice5, Settings, Maximize, Minimize, Moon, Sun, ArrowRight, HelpCircle } from 'lucide-react';
-import { useGame } from './useGame';
+import { useGame } from './gamelogic/useGame';
 import { MainMenu } from './components/MainMenu';
 import { PlayerCard } from './components/PlayerCard';
 import { TrackMap } from './components/TrackMap';

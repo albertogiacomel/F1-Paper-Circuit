@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PlayerId, GameMode, PlayerState, GameLog, EventKey, TranslationKey, TrackDefinition } from './types/index';
-import { INITIAL_PLAYER_1, INITIAL_PLAYER_2, AVAILABLE_COLORS, DEFAULT_LAPS, MAP_ORDER } from './config/constants';
-import { MAPS } from './config/maps/index';
+import { PlayerId, GameMode, PlayerState, GameLog, EventKey, TranslationKey, TrackDefinition } from '../types/index';
+import { INITIAL_PLAYER_1, INITIAL_PLAYER_2, AVAILABLE_COLORS, DEFAULT_LAPS, MAP_ORDER } from '../config/constants';
+import { MAPS } from '../config/maps/index';
 import { calculateMove } from './gameEngine';
 
 const STORAGE_KEY = 'f1_paper_save_v3';
@@ -45,6 +45,8 @@ export function useGame() {
     newLaps: number;
     extraTurn: boolean;
     skipTurn: boolean;
+    consecutiveSixes: number;
+    eventKey: EventKey;
   } | null>(null);
 
   const addLog = useCallback((key: TranslationKey, args: Record<string, string|number> = {}, type: GameLog['type'] = 'info') => {
@@ -177,7 +179,9 @@ export function useGame() {
       finalPosition: result.newPosition,
       newLaps: result.newLaps,
       extraTurn: result.extraTurn,
-      skipTurn: result.skipTurn
+      skipTurn: result.skipTurn,
+      consecutiveSixes: result.consecutiveSixes,
+      eventKey: result.eventKey
     });
     setModalState({
       isOpen: true,
@@ -195,8 +199,16 @@ export function useGame() {
       updateFn(prev => ({
           ...prev,
           position: pendingUpdate.landedPosition,
-          lastRoll: modalState.rollValue || prev.lastRoll
+          lastRoll: modalState.rollValue || prev.lastRoll,
+          consecutiveSixes: pendingUpdate.consecutiveSixes
       }));
+      
+      // If Engine Failure, skip animation delays and go straight to event
+      if (pendingUpdate.eventKey === 'ENGINE_FAILURE') {
+         setModalState({ isOpen: true, type: 'EVENT', eventKey: 'ENGINE_FAILURE' });
+         return;
+      }
+
       const currentPos = pendingUpdate.playerId === 1 ? p1.position : p2.position;
       let distance = Math.abs(pendingUpdate.landedPosition - currentPos);
       if (pendingUpdate.landedPosition < currentPos) {
@@ -213,6 +225,12 @@ export function useGame() {
       }
     } 
     else if (modalState.type === 'EVENT') {
+       if (pendingUpdate.eventKey === 'ENGINE_FAILURE') {
+            // Instant Loss Logic
+            finishTurnLogic();
+            return;
+       }
+
        const updateFn = pendingUpdate.playerId === 1 ? setP1 : setP2;
        updateFn(prev => ({
            ...prev,
@@ -225,7 +243,16 @@ export function useGame() {
 
   const finishTurnLogic = () => {
     if (!pendingUpdate) return;
-    const { playerId, newLaps, skipTurn, extraTurn } = pendingUpdate;
+    const { playerId, newLaps, skipTurn, extraTurn, eventKey } = pendingUpdate;
+
+    if (eventKey === 'ENGINE_FAILURE') {
+        // Player 1 blew up? Player 2 wins.
+        setWinner(playerId === 1 ? 2 : 1);
+        setIsRolling(false);
+        setPendingUpdate(null);
+        return;
+    }
+
     const updateFn = playerId === 1 ? setP1 : setP2;
     updateFn(prev => ({
         ...prev,
@@ -233,6 +260,7 @@ export function useGame() {
         laps: pendingUpdate.newLaps,
         skipTurn: skipTurn
     }));
+    
     if (newLaps > totalLaps) setWinner(playerId);
     else if (!extraTurn) setTurn(prev => prev === 1 ? 2 : 1);
     setIsRolling(false);

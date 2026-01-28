@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Wrench, AlertTriangle, Flag, Zap, Timer, Skull, ThumbsUp, Wind, ChevronsRight } from 'lucide-react';
+import { Wrench, AlertTriangle, Flag, Zap, Timer, Skull, ThumbsUp, Wind, ChevronsRight, Flame } from 'lucide-react';
 import { EventKey, Language } from '../types/index';
 
 // Interfaccia per l'evento grafico
@@ -80,6 +79,22 @@ export const GAME_EVENTS: Record<EventKey, GameEventDef | null> = {
         <Flag size={80} className="relative z-10 text-green-600 fill-green-200" />
         <ThumbsUp size={32} className="absolute bottom-0 right-0 text-blue-600 animate-bounce" />
       </div>
+    )
+  },
+
+  'ENGINE_FAILURE': {
+    title: { it: "MOTORE ROTTO!", en: "ENGINE BLOWN!" },
+    description: {
+        it: "Hai spinto troppo facendo tre 6 di fila! Il motore ha ceduto. Sei fuori dalla gara.",
+        en: "You pushed too hard with three 6s in a row! The engine failed. You are out of the race."
+    },
+    color: "text-orange-600 bg-orange-100 border-orange-500",
+    Illustration: () => (
+        <div className="relative w-32 h-32 flex items-center justify-center">
+            <div className="absolute inset-0 bg-orange-200 rounded-full opacity-50 animate-pulse"></div>
+            <Flame size={80} className="relative z-10 text-orange-600 animate-pulse" />
+            <Skull size={40} className="absolute bottom-0 right-0 z-20 text-black/70" />
+        </div>
     )
   }
 };

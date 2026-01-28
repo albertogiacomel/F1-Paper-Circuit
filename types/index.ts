@@ -60,7 +60,8 @@ export type TranslationKey =
   | 'log_danger'
   | 'log_move_back'
   | 'log_drs'
-  | 'log_skip_turn';
+  | 'log_skip_turn'
+  | 'log_engine_failure';
 
 export interface GameLog {
   id: string;
@@ -80,10 +81,11 @@ export interface PlayerState {
   hexColor: string; 
   hexBorderColor: string; 
   isAi: boolean;
-  skipTurn?: boolean; 
+  skipTurn?: boolean;
+  consecutiveSixes: number;
 }
 
-export type EventKey = 'PIT_STOP' | 'DANGER_ZONE' | 'NORMAL_MOVE' | 'FINISH' | 'DRS_ZONE' | 'LAP_COMPLETE';
+export type EventKey = 'PIT_STOP' | 'DANGER_ZONE' | 'NORMAL_MOVE' | 'FINISH' | 'DRS_ZONE' | 'LAP_COMPLETE' | 'ENGINE_FAILURE';
 
 export interface MoveResult {
   landedPosition: number; 
@@ -96,6 +98,7 @@ export interface MoveResult {
   skipTurn: boolean;
   eventKey: EventKey;
   rollValue: number;
+  consecutiveSixes: number;
 }
 
 export interface Point {

@@ -46,7 +46,8 @@ export const INITIAL_PLAYER_1: PlayerState = {
   hexColor: AVAILABLE_COLORS[0].hex,
   hexBorderColor: AVAILABLE_COLORS[0].borderHex,
   isAi: false,
-  skipTurn: false
+  skipTurn: false,
+  consecutiveSixes: 0
 };
 
 export const INITIAL_PLAYER_2: PlayerState = {
@@ -60,5 +61,6 @@ export const INITIAL_PLAYER_2: PlayerState = {
   hexColor: AVAILABLE_COLORS[1].hex,
   hexBorderColor: AVAILABLE_COLORS[1].borderHex,
   isAi: false,
-  skipTurn: false
+  skipTurn: false,
+  consecutiveSixes: 0
 };

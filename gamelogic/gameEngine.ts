@@ -1,5 +1,4 @@
-
-import { MoveResult, PlayerState, TrackDefinition } from './types/index';
+import { MoveResult, PlayerState, TrackDefinition } from '../types/index';
 
 /**
  * Calculates the outcome of a dice roll based on game rules with LAP logic.
@@ -38,12 +37,34 @@ export const calculateMove = (
   let extraTurn = false;
   let skipTurn = false; 
   let eventKey: MoveResult['eventKey'] = 'NORMAL_MOVE';
-
-  // RULE: Roll 6 = Extra Turn (Initial Check)
+  
+  // RULE: Consecutive Sixes Logic
+  let consecutiveSixes = currentPlayer.consecutiveSixes || 0;
+  
   if (roll === 6) {
+      consecutiveSixes++;
       extraTurn = true;
       translationKey = 'log_roll_6';
       logType = 'success';
+
+      // ENGINE BLOWN RULE
+      if (consecutiveSixes >= 3) {
+          return {
+              landedPosition: currentPlayer.position, // Stays put (or doesn't matter, lost)
+              newPosition: currentPlayer.position,
+              newLaps: currentPlayer.laps,
+              rollValue: roll,
+              translationKey: 'log_engine_failure',
+              logArgs: { player: currentPlayer.name },
+              logType: 'danger',
+              extraTurn: false,
+              skipTurn: true,
+              eventKey: 'ENGINE_FAILURE',
+              consecutiveSixes: consecutiveSixes
+          };
+      }
+  } else {
+      consecutiveSixes = 0;
   }
 
   // 1. CHECK WIN CONDITION (Completed required laps)
@@ -58,16 +79,14 @@ export const calculateMove = (
       logType: 'success',
       extraTurn: false, // Win cancels extra turn
       skipTurn: false,
-      eventKey: 'FINISH'
+      eventKey: 'FINISH',
+      consecutiveSixes
     };
   }
   
   // 1.5 Check Lap Complete (but not race finish)
   if (lapsGained > 0) {
       // Don't overwrite log if it was a 6, unless it's a critical lap update?
-      // Actually, let's keep the "Roll 6" log as priority if it happened, 
-      // or combine them. For simplicity, we prioritize the Roll 6 message if present,
-      // but update the event key.
       if (translationKey !== 'log_roll_6') {
         translationKey = 'log_lap_complete';
         logType = 'success';
@@ -133,6 +152,7 @@ export const calculateMove = (
     logType,
     extraTurn,
     skipTurn,
-    eventKey
+    eventKey,
+    consecutiveSixes
   };
 };
