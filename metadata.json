@@ -1,5 +1,5 @@
 {
-  "name": "F1 Paper Circuit",
+  "name": "F1 PAPER CIRCUIT",
   "description": "A turn-based F1 board game on graph paper. Play against a friend or the AI. Watch out for Danger Zones and aim for Pit Stops!",
   "requestFramePermissions": []
 }

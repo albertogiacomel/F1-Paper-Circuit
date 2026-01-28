@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flag, User, Bot } from 'lucide-react';
 import { GameMode, Language } from '../types/index';
-import { TRANSLATIONS } from '../i18n/translations';
+import { TRANSLATIONS } from '../config/i18n/translations';
 
 interface MainMenuProps {
   onStart: (mode: GameMode) => void;
@@ -22,8 +22,10 @@ export function MainMenu({ onStart, language, isDarkMode }: MainMenuProps) {
             <Flag size={48} className="text-red-600" />
           </div>
         </div>
-        <h1 className={`font-display text-4xl mb-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{t.title}</h1>
-        <p className={`mb-8 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>v6.1 - Ready to race?</p>
+        <h1 className={`font-display text-4xl mb-2 font-black tracking-normal ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+          <span className="text-red-600">F1 PAPER</span> CIRCUIT
+        </h1>
+        <p className={`mb-8 font-medium uppercase tracking-widest text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Ready to race?</p>
         
         <div className="space-y-4">
           <button 
@@ -38,7 +40,7 @@ export function MainMenu({ onStart, language, isDarkMode }: MainMenuProps) {
               <User size={24} />
             </div>
             <div className="text-left">
-              <div className="font-bold">{t.start_pvp}</div>
+              <div className="font-bold uppercase">{t.start_pvp}</div>
               <div className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t.start_pvp_desc}</div>
             </div>
           </button>
@@ -55,7 +57,7 @@ export function MainMenu({ onStart, language, isDarkMode }: MainMenuProps) {
               <Bot size={24} />
             </div>
             <div className="text-left">
-              <div className="font-bold">{t.start_ai}</div>
+              <div className="font-bold uppercase">{t.start_ai}</div>
               <div className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t.start_ai_desc}</div>
             </div>
           </button>

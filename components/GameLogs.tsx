@@ -1,7 +1,6 @@
-
 import React, { useEffect, useRef } from 'react';
 import { GameLog, Language } from '../types/index';
-import { TRANSLATIONS } from '../i18n/translations';
+import { TRANSLATIONS } from '../config/i18n/translations';
 
 interface GameLogsProps {
   logs: GameLog[];

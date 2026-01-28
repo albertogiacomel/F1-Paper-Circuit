@@ -1,11 +1,10 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { PlayerId, GameMode, PlayerState, GameLog, EventKey, TranslationKey, TrackDefinition } from './types/index';
 import { INITIAL_PLAYER_1, INITIAL_PLAYER_2, AVAILABLE_COLORS, DEFAULT_LAPS, MAP_ORDER } from './config/constants';
 import { MAPS } from './config/maps/index';
 import { calculateMove } from './gameEngine';
 
-const STORAGE_KEY = 'f1_paper_save_v2'; // Bumped version for new schema
+const STORAGE_KEY = 'f1_paper_save_v3';
 
 interface SavedState {
   gameMode: GameMode;
@@ -16,12 +15,11 @@ interface SavedState {
   winner: PlayerId | null;
   logs: GameLog[];
   totalLaps: number;
+  manualDiceEnabled: boolean;
 }
 
 export function useGame() {
-  // Initialize State from LocalStorage if available
   const [initialized, setInitialized] = useState(false);
-
   const [activeMap, setActiveMap] = useState<TrackDefinition>(MAPS.australia);
   const [gameMode, setGameMode] = useState<GameMode>(null);
   const [turn, setTurn] = useState<PlayerId>(1);
@@ -30,18 +28,16 @@ export function useGame() {
   const [winner, setWinner] = useState<PlayerId | null>(null);
   const [logs, setLogs] = useState<GameLog[]>([]);
   const [totalLaps, setTotalLaps] = useState<number>(DEFAULT_LAPS);
-  
+  const [manualDiceEnabled, setManualDiceEnabled] = useState<boolean>(false);
   const [isRolling, setIsRolling] = useState(false);
 
-  // Modal States
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
-    type: 'DICE' | 'EVENT';
+    type: 'DICE' | 'EVENT' | 'MANUAL_INPUT';
     eventKey?: EventKey;
     rollValue?: number;
   }>({ isOpen: false, type: 'DICE' });
 
-  // Pending updates (applied in steps)
   const [pendingUpdate, setPendingUpdate] = useState<{
     playerId: PlayerId;
     landedPosition: number;
@@ -60,13 +56,11 @@ export function useGame() {
     }]);
   }, []);
 
-  // LOAD GAME ON MOUNT
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
         const parsed: SavedState = JSON.parse(saved);
-        // @ts-ignore
         const map = Object.values(MAPS).find(m => m.id === parsed.activeMapId) || MAPS.australia;
         setActiveMap(map);
         setGameMode(parsed.gameMode);
@@ -76,6 +70,7 @@ export function useGame() {
         setWinner(parsed.winner);
         setLogs(parsed.logs);
         setTotalLaps(parsed.totalLaps || DEFAULT_LAPS);
+        setManualDiceEnabled(!!parsed.manualDiceEnabled);
       } catch (e) {
         console.error("Failed to load save", e);
       }
@@ -83,16 +78,12 @@ export function useGame() {
     setInitialized(true);
   }, []);
 
-  // SAVE GAME ON CHANGE
   useEffect(() => {
     if (!initialized) return;
-    
-    // Don't save if in main menu
     if (!gameMode) {
         localStorage.removeItem(STORAGE_KEY);
         return;
     }
-
     const stateToSave: SavedState = {
       gameMode,
       activeMapId: activeMap.id,
@@ -101,40 +92,39 @@ export function useGame() {
       p2,
       winner,
       logs,
-      totalLaps
+      totalLaps,
+      manualDiceEnabled
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
-  }, [gameMode, activeMap, turn, p1, p2, winner, logs, totalLaps, initialized]);
+  }, [gameMode, activeMap, turn, p1, p2, winner, logs, totalLaps, manualDiceEnabled, initialized]);
 
-  // HANDLE SKIP TURN LOGIC
   useEffect(() => {
     if (!gameMode || winner || isRolling || modalState.isOpen) return;
-
     const currentPlayer = turn === 1 ? p1 : p2;
-    
     if (currentPlayer.skipTurn) {
-        // Player must skip this turn
         const timer = setTimeout(() => {
             addLog('log_skip_turn', { player: currentPlayer.name }, 'warning');
-            
-            // Remove skip flag
             const updateFn = turn === 1 ? setP1 : setP2;
             updateFn(prev => ({ ...prev, skipTurn: false }));
-
-            // Switch turn immediately
             setTurn(prev => prev === 1 ? 2 : 1);
         }, 1000);
-
         return () => clearTimeout(timer);
     }
   }, [turn, gameMode, winner, isRolling, modalState.isOpen, p1, p2, addLog]);
 
+  const toggleMode = () => {
+    const newMode = gameMode === 'AI' ? 'PVP' : 'AI';
+    setGameMode(newMode);
+    setP2(prev => ({
+      ...prev,
+      isAi: newMode === 'AI',
+      name: newMode === 'AI' ? "CPU Bot" : (prev.name === "CPU Bot" ? "Player 2" : prev.name)
+    }));
+  };
 
   const changeMap = (mapId: string) => {
-    // @ts-ignore
     const newMap = Object.values(MAPS).find(m => m.id === mapId) || MAPS.australia;
     setActiveMap(newMap);
-    // When changing map explicitly, we reset the game state
     resetGame(newMap); 
   };
 
@@ -142,40 +132,11 @@ export function useGame() {
     const currentIndex = MAP_ORDER.indexOf(activeMap.id);
     const nextIndex = (currentIndex + 1) % MAP_ORDER.length;
     const nextMapId = MAP_ORDER[nextIndex];
-    // @ts-ignore
-    const nextMap = MAPS[nextMapId] || MAPS.australia;
+    const nextMap = (MAPS as any)[nextMapId] || MAPS.australia;
     setActiveMap(nextMap);
     resetGame(nextMap);
   };
   
-  const changeTotalLaps = (laps: number) => {
-      setTotalLaps(laps);
-  };
-
-  const updatePlayerName = (id: PlayerId, newName: string) => {
-    if (id === 1) {
-      setP1(prev => ({ ...prev, name: newName }));
-    } else {
-      setP2(prev => ({ ...prev, name: newName }));
-    }
-  };
-
-  const updatePlayerColor = (id: PlayerId, colorIndex: number) => {
-    const newColor = AVAILABLE_COLORS[colorIndex];
-    if (!newColor) return;
-
-    const updater = (prev: PlayerState) => ({
-      ...prev,
-      color: newColor.tailwind,
-      borderColor: newColor.border,
-      hexColor: newColor.hex,
-      hexBorderColor: newColor.borderHex
-    });
-
-    if (id === 1) setP1(updater);
-    else setP2(updater);
-  };
-
   const startGame = (mode: GameMode) => {
     setGameMode(mode);
     setP1({ ...INITIAL_PLAYER_1 });
@@ -191,9 +152,7 @@ export function useGame() {
   };
 
   const resetGame = (newMap?: TrackDefinition) => {
-    const mapToUse = newMap || activeMap;
     if (!gameMode) return; 
-
     setTurn(1);
     setP1({ ...INITIAL_PLAYER_1, name: p1.name });
     setP2({ 
@@ -201,20 +160,36 @@ export function useGame() {
         name: p2.name, 
         isAi: p2.isAi
     });
-
     setWinner(null);
     setLogs([]);
     setModalState({ isOpen: false, type: 'DICE' });
     if(newMap) setActiveMap(newMap);
-    
     addLog('log_start', {}, 'info');
+  };
+
+  const processRollResult = (roll: number) => {
+    const currentPlayer = turn === 1 ? p1 : p2;
+    const result = calculateMove(currentPlayer, roll, activeMap, totalLaps);
+    addLog(result.translationKey, result.logArgs, result.logType);
+    setPendingUpdate({
+      playerId: turn,
+      landedPosition: result.landedPosition,
+      finalPosition: result.newPosition,
+      newLaps: result.newLaps,
+      extraTurn: result.extraTurn,
+      skipTurn: result.skipTurn
+    });
+    setModalState({
+      isOpen: true,
+      type: 'DICE',
+      rollValue: roll,
+      eventKey: result.eventKey
+    });
   };
 
   const handleModalClose = () => {
     setModalState(prev => ({ ...prev, isOpen: false }));
-
     if (!pendingUpdate) return;
-
     if (modalState.type === 'DICE') {
       const updateFn = pendingUpdate.playerId === 1 ? setP1 : setP2;
       updateFn(prev => ({
@@ -222,114 +197,69 @@ export function useGame() {
           position: pendingUpdate.landedPosition,
           lastRoll: modalState.rollValue || prev.lastRoll
       }));
-
       const currentPos = pendingUpdate.playerId === 1 ? p1.position : p2.position;
       let distance = Math.abs(pendingUpdate.landedPosition - currentPos);
       if (pendingUpdate.landedPosition < currentPos) {
           distance = (activeMap.totalCells - currentPos) + pendingUpdate.landedPosition;
       }
-      
       const animationDelay = (distance * 200) + 400;
-
       const isSpecialEvent = modalState.eventKey && modalState.eventKey !== 'NORMAL_MOVE' && modalState.eventKey !== 'LAP_COMPLETE';
-
       if (isSpecialEvent) {
         setTimeout(() => {
-            setModalState({
-                isOpen: true,
-                type: 'EVENT',
-                eventKey: modalState.eventKey
-            });
+            setModalState({ isOpen: true, type: 'EVENT', eventKey: modalState.eventKey });
         }, animationDelay);
       } else {
-        setTimeout(() => {
-             finishTurnLogic();
-        }, animationDelay);
+        setTimeout(() => { finishTurnLogic(); }, animationDelay);
       }
     } 
     else if (modalState.type === 'EVENT') {
-       // Visual update to final pos (e.g., danger zone back move)
        const updateFn = pendingUpdate.playerId === 1 ? setP1 : setP2;
        updateFn(prev => ({
            ...prev,
            position: pendingUpdate.finalPosition,
            laps: pendingUpdate.newLaps
        }));
-       
-       setTimeout(() => {
-           finishTurnLogic();
-       }, 500); 
+       setTimeout(() => { finishTurnLogic(); }, 500); 
     }
   };
 
   const finishTurnLogic = () => {
     if (!pendingUpdate) return;
-    const { playerId, newLaps, extraTurn, skipTurn } = pendingUpdate;
-
+    const { playerId, newLaps, skipTurn, extraTurn } = pendingUpdate;
     const updateFn = playerId === 1 ? setP1 : setP2;
     updateFn(prev => ({
         ...prev,
         position: pendingUpdate.finalPosition,
         laps: pendingUpdate.newLaps,
-        skipTurn: skipTurn // Apply skip turn flag if caught in pit
+        skipTurn: skipTurn
     }));
-
-    if (newLaps > totalLaps) {
-        setWinner(playerId);
-    } else if (!extraTurn) {
-        setTurn(prev => prev === 1 ? 2 : 1);
-    }
-    // If extraTurn is true (e.g., specific event), turn stays same. 
-    // BUT: Pit Stop is now skipTurn, so extraTurn is false, turn switches to opponent.
-    
+    if (newLaps > totalLaps) setWinner(playerId);
+    else if (!extraTurn) setTurn(prev => prev === 1 ? 2 : 1);
     setIsRolling(false);
     setPendingUpdate(null);
   };
 
   const performRoll = useCallback(() => {
     if (winner || isRolling) return;
-    
     const currentPlayer = turn === 1 ? p1 : p2;
-    
-    // Safety check: if skipping turn, we shouldn't be here, but just in case
     if (currentPlayer.skipTurn) return;
 
-    setIsRolling(true);
+    if (manualDiceEnabled && !currentPlayer.isAi) {
+      setModalState({ isOpen: true, type: 'MANUAL_INPUT' });
+      return;
+    }
 
+    setIsRolling(true);
     setTimeout(() => {
       const roll = Math.floor(Math.random() * 6) + 1;
-      const result = calculateMove(currentPlayer, roll, activeMap, totalLaps);
-
-      addLog(result.translationKey, result.logArgs, result.logType);
-
-      setPendingUpdate({
-        playerId: turn,
-        landedPosition: result.landedPosition,
-        finalPosition: result.newPosition,
-        newLaps: result.newLaps,
-        extraTurn: result.extraTurn,
-        skipTurn: result.skipTurn
-      });
-
-      setModalState({
-        isOpen: true,
-        type: 'DICE',
-        rollValue: roll,
-        eventKey: result.eventKey
-      });
-
+      processRollResult(roll);
     }, 500);
-  }, [winner, isRolling, turn, p1, p2, addLog, activeMap, totalLaps]);
+  }, [winner, isRolling, turn, p1, p2, activeMap, totalLaps, manualDiceEnabled]);
 
-  // AI Logic
   useEffect(() => {
     if (gameMode === 'AI' && turn === 2 && !winner && !isRolling && !modalState.isOpen) {
-      // AI check for skip turn is handled by the general useEffect above
-      // If not skipping, perform roll
       if (!p2.skipTurn) {
-          const timer = setTimeout(() => {
-            performRoll();
-          }, 1500);
+          const timer = setTimeout(() => { performRoll(); }, 1500);
           return () => clearTimeout(timer);
       }
     }
@@ -337,9 +267,10 @@ export function useGame() {
 
   return {
     gameMode,
+    toggleMode,
     activeMap,
     changeMap,
-    goToNextMap, // Exported
+    goToNextMap,
     turn,
     p1,
     p2,
@@ -349,11 +280,18 @@ export function useGame() {
     startGame,
     resetGame,
     performRoll,
-    updatePlayerName,
-    updatePlayerColor,
+    processRollResult,
+    updatePlayerName: (id: PlayerId, name: string) => id === 1 ? setP1(p => ({...p, name})) : setP2(p => ({...p, name})),
+    updatePlayerColor: (id: PlayerId, idx: number) => {
+      const c = AVAILABLE_COLORS[idx];
+      const u = (p: PlayerState) => ({...p, color: c.tailwind, borderColor: c.border, hexColor: c.hex, hexBorderColor: c.borderHex});
+      if (id === 1) setP1(u); else setP2(u);
+    },
     modalState,
     handleModalClose,
     totalLaps,
-    changeTotalLaps
+    changeTotalLaps: setTotalLaps,
+    manualDiceEnabled,
+    setManualDiceEnabled
   };
 }

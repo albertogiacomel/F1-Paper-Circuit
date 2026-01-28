@@ -1,11 +1,9 @@
-
 export type PlayerId = 1 | 2;
 export type GameMode = 'PVP' | 'AI' | null;
 export type Language = 'it' | 'en';
 
 export type LogType = 'info' | 'success' | 'danger' | 'warning';
 
-// Definiamo le chiavi di traduzione possibili (estratte da translations.ts)
 export type TranslationKey = 
   | 'title'
   | 'start_pvp'
@@ -21,6 +19,7 @@ export type TranslationKey =
   | 'rolling'
   | 'ai_thinking'
   | 'roll_dice'
+  | 'enter_dice'
   | 'race_telemetry'
   | 'waiting_start'
   | 'pos'
@@ -33,10 +32,28 @@ export type TranslationKey =
   | 'start_finish_label'
   | 'settings_title'
   | 'total_laps'
+  | 'version'
+  | 'help_title'
+  | 'rule_movement_title'
+  | 'rule_movement_desc'
+  | 'rule_six_title'
+  | 'rule_six_desc'
+  | 'rule_pit_title'
+  | 'rule_pit_desc'
+  | 'rule_danger_title'
+  | 'rule_danger_desc'
+  | 'rule_drs_title'
+  | 'rule_drs_desc'
+  | 'rule_win_title'
+  | 'rule_win_desc'
+  | 'manual_dice_label'
+  | 'manual_dice_desc'
+  | 'game_mode_label'
+  | 'select_value'
   // Log Keys
   | 'log_start'
   | 'log_roll'
-  | 'log_roll_6' // NEW
+  | 'log_roll_6'
   | 'log_lap_complete'
   | 'log_finish'
   | 'log_pitstop'
@@ -94,4 +111,13 @@ export interface TrackDefinition {
   pitStops: number[];
   dangerZones: number[];
   drsZones: number[]; 
+}
+
+export interface TeamColor {
+  id: string;
+  teamName: string;
+  tailwind: string;
+  border: string;
+  hex: string;
+  borderHex: string;
 }

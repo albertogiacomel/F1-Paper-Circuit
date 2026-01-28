@@ -1,8 +1,7 @@
-
 import React from 'react';
-import { X, Globe, Map as MapIcon, RotateCw } from 'lucide-react';
-import { Language } from '../types/index';
-import { TRANSLATIONS } from '../i18n/translations';
+import { X, Globe, Map as MapIcon, RotateCw, Info, Dice6, Bot, User } from 'lucide-react';
+import { Language, GameMode } from '../types/index';
+import { TRANSLATIONS } from '../config/i18n/translations';
 import { MAPS } from '../config/maps/index';
 import { LAP_OPTIONS, MAP_ORDER } from '../config/constants';
 
@@ -16,19 +15,21 @@ interface SettingsModalProps {
   onMapChange: (mapId: string) => void;
   totalLaps: number;
   onLapsChange: (laps: number) => void;
+  manualDiceEnabled: boolean;
+  setManualDiceEnabled: (val: boolean) => void;
+  gameMode: GameMode;
+  onToggleMode: () => void;
 }
 
-export function SettingsModal({ isOpen, onClose, language, setLanguage, isDarkMode, currentMapId, onMapChange, totalLaps, onLapsChange }: SettingsModalProps) {
+export function SettingsModal({ 
+  isOpen, onClose, language, setLanguage, isDarkMode, currentMapId, 
+  onMapChange, totalLaps, onLapsChange, manualDiceEnabled, setManualDiceEnabled,
+  gameMode, onToggleMode
+}: SettingsModalProps) {
   if (!isOpen) return null;
 
   const t = TRANSLATIONS[language];
-
-  // Create sorted map list using imported MAP_ORDER
-  const sortedMaps = MAP_ORDER.map(id => {
-      // @ts-ignore
-      const m = MAPS[id];
-      return m ? m : null;
-  }).filter(m => m !== null);
+  const sortedMaps = MAP_ORDER.map(id => (MAPS as any)[id] || null).filter(m => m !== null);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -43,6 +44,52 @@ export function SettingsModal({ isOpen, onClose, language, setLanguage, isDarkMo
         </div>
 
         <div className="space-y-6">
+          {/* Game Mode Toggle */}
+          <div>
+            <label className="flex items-center gap-2 font-bold mb-3 text-lg">
+              <Bot size={20} />
+              {t.game_mode_label}
+            </label>
+            <button 
+              onClick={onToggleMode}
+              className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all font-bold
+                ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-100 border-slate-300'}
+              `}
+            >
+              <div className="flex items-center gap-2">
+                {gameMode === 'AI' ? <Bot size={20} className="text-purple-500" /> : <User size={20} className="text-blue-500" />}
+                <span>{gameMode === 'AI' ? t.start_ai : t.start_pvp}</span>
+              </div>
+              <div className="text-xs text-blue-500 underline uppercase">Switch</div>
+            </button>
+          </div>
+
+          <hr className={`border-t-2 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`} />
+
+          {/* Manual Dice Toggle */}
+          <div>
+             <label className="flex items-center gap-2 font-bold mb-1 text-lg">
+               <Dice6 size={20} />
+               {t.manual_dice_label}
+             </label>
+             <p className={`text-xs mb-3 opacity-60`}>{t.manual_dice_desc}</p>
+             <button
+               onClick={() => setManualDiceEnabled(!manualDiceEnabled)}
+               className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all font-bold
+                 ${manualDiceEnabled 
+                   ? 'bg-green-600/20 border-green-500 text-green-500' 
+                   : (isDarkMode ? 'bg-slate-700 border-slate-600 text-slate-400' : 'bg-slate-100 border-slate-300 text-slate-500')}
+               `}
+             >
+               <span>{manualDiceEnabled ? 'ON' : 'OFF'}</span>
+               <div className={`w-10 h-6 rounded-full relative transition-colors ${manualDiceEnabled ? 'bg-green-500' : 'bg-slate-400'}`}>
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${manualDiceEnabled ? 'left-5' : 'left-1'}`} />
+               </div>
+             </button>
+          </div>
+
+          <hr className={`border-t-2 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`} />
+
           {/* Map Selector */}
           <div>
             <label className="flex items-center gap-2 font-bold mb-3 text-lg">
@@ -60,13 +107,10 @@ export function SettingsModal({ isOpen, onClose, language, setLanguage, isDarkMo
             >
                 {sortedMaps.map((map, index) => (
                     <option key={map.id} value={map.id}>
-                        {index + 1}. {map.name} ({map.path.length} steps)
+                        {index + 1}. {map.name}
                     </option>
                 ))}
             </select>
-            <p className="text-xs mt-2 opacity-60 italic">
-               *Changing map will reset the current game.
-            </p>
           </div>
 
           <hr className={`border-t-2 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`} />
@@ -104,37 +148,14 @@ export function SettingsModal({ isOpen, onClose, language, setLanguage, isDarkMo
               {t.language}
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <button 
-                onClick={() => setLanguage('it')}
-                className={`py-3 px-4 rounded-xl font-bold border-2 transition-all ${
-                  language === 'it' 
-                    ? 'bg-blue-600 text-white border-blue-700 shadow-md transform scale-[1.02]' 
-                    : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-blue-400'
-                }`}
-              >
-                Italiano 🇮🇹
-              </button>
-              <button 
-                onClick={() => setLanguage('en')}
-                className={`py-3 px-4 rounded-xl font-bold border-2 transition-all ${
-                  language === 'en' 
-                    ? 'bg-blue-600 text-white border-blue-700 shadow-md transform scale-[1.02]' 
-                    : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-blue-400'
-                }`}
-              >
-                English 🇬🇧
-              </button>
+              <button onClick={() => setLanguage('it')} className={`py-3 px-4 rounded-xl font-bold border-2 transition-all ${language === 'it' ? 'bg-blue-600 text-white border-blue-700' : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700'}`}>Italiano 🇮🇹</button>
+              <button onClick={() => setLanguage('en')} className={`py-3 px-4 rounded-xl font-bold border-2 transition-all ${language === 'en' ? 'bg-blue-600 text-white border-blue-700' : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700'}`}>English 🇬🇧</button>
             </div>
           </div>
         </div>
 
         <div className="mt-8 flex justify-end">
-          <button 
-            onClick={onClose}
-            className="px-6 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 font-bold rounded-lg transition-colors"
-          >
-            {t.close}
-          </button>
+          <button onClick={onClose} className="px-6 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 font-bold rounded-lg transition-colors">{t.close}</button>
         </div>
       </div>
     </div>
