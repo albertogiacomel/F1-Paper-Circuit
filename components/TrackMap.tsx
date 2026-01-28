@@ -14,7 +14,7 @@ interface TrackMapProps {
 }
 
 const COUNTRY_PALETTES: Record<string, [string, string]> = {
-  monza_paper: ['#009246', '#CE2B37'], italy: ['#009246', '#CE2B37'], imola: ['#009246', '#CE2B37'],
+  italy: ['#009246', '#CE2B37'], imola: ['#009246', '#CE2B37'],
   australia: ['#FFCD00', '#00843D'], brazil: ['#FFDF00', '#009C3B'],
   usa: ['#B22234', '#3C3B6E'], miami: ['#00A3E0', '#F75C9A'], las_vegas: ['#000000', '#D4AF37'],
   japan: ['#BC002C', '#FFFFFF'], china: ['#EE1C25', '#FFFF00'], netherlands: ['#FF4F00', '#21468B'],
