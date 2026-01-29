@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { X, Globe, Map as MapIcon, RotateCw, Info, Dice6, Bot, User } from 'lucide-react';
 import { Language, GameMode } from '../types/index';
 import { TRANSLATIONS } from '../config/i18n/translations';
@@ -23,32 +23,60 @@ interface SettingsModalProps {
 
 const TrackPreview = ({ mapId }: { mapId: string }) => {
     const map = (MAPS as any)[mapId];
+    const pathRef = useRef<SVGPathElement>(null);
+    // Default fallback
+    const [viewBox, setViewBox] = useState("0 0 100 100");
+
+    useLayoutEffect(() => {
+        if (!map) return;
+
+        if (map.svgPath) {
+            // For SVG tracks, render the path and measure it
+            if (pathRef.current) {
+                try {
+                    const bbox = pathRef.current.getBBox();
+                    // Reduced padding (approx 5%)
+                    const paddingX = bbox.width * 0.05;
+                    const paddingY = bbox.height * 0.05;
+                    
+                    const minPad = Math.max(bbox.width, bbox.height) * 0.05;
+                    const finalPadX = Math.max(paddingX, minPad);
+                    const finalPadY = Math.max(paddingY, minPad);
+                    
+                    setViewBox(`${bbox.x - finalPadX} ${bbox.y - finalPadY} ${bbox.width + finalPadX*2} ${bbox.height + finalPadY*2}`);
+                } catch(e) {
+                    // fallback if getBBox fails (e.g. not attached)
+                    setViewBox("0 0 500 500");
+                }
+            }
+        } else if (map.path) {
+            // Legacy Point System
+            const xs = map.path.map((p:any) => p.x);
+            const ys = map.path.map((p:any) => p.y);
+            const minX = Math.min(...xs);
+            const maxX = Math.max(...xs);
+            const minY = Math.min(...ys);
+            const maxY = Math.max(...ys);
+            
+            const padding = 2;
+            const width = maxX - minX + (padding * 2);
+            const height = maxY - minY + (padding * 2);
+            setViewBox(`${minX - padding} ${minY - padding} ${width} ${height}`);
+        }
+    }, [map]);
+
     if (!map) return null;
-    
-    // Calculate bounds to center the map
-    const xs = map.path.map((p:any) => p.x);
-    const ys = map.path.map((p:any) => p.y);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    
-    const padding = 2;
-    const width = maxX - minX + (padding * 2);
-    const height = maxY - minY + (padding * 2);
-    const viewBox = `${minX - padding} ${minY - padding} ${width} ${height}`;
-    
-    const points = map.path.map((p:any) => `${p.x},${p.y}`).join(' ');
 
     return (
         <div className="w-full h-32 bg-slate-100 dark:bg-slate-900 rounded-xl mb-4 p-4 flex items-center justify-center border-2 border-slate-200 dark:border-slate-700">
-            <svg viewBox={viewBox} className="w-full h-full text-slate-400 dark:text-slate-500 stroke-current fill-none stroke-[0.5]">
-                <polyline points={points} strokeLinejoin="round" strokeLinecap="round" />
-                {/* Start Point */}
-                <circle cx={map.path[0].x} cy={map.path[0].y} r={0.8} className="fill-green-500 stroke-none" />
-                {/* Direction arrow */}
-                {map.path.length > 1 && (
-                     <line x1={map.path[0].x} y1={map.path[0].y} x2={map.path[1].x} y2={map.path[1].y} stroke="green" strokeWidth="0.5" markerEnd="url(#arrow)" />
+            <svg viewBox={viewBox} className="w-full h-full text-slate-400 dark:text-slate-500 stroke-current fill-none stroke-[2]">
+                {map.svgPath ? (
+                    <>
+                        <path ref={pathRef} d={map.svgPath} stroke="currentColor" strokeWidth="15" fill="none" opacity="0.2" />
+                        <path d={map.svgPath} stroke="currentColor" strokeWidth="5" fill="none" />
+                    </>
+                ) : (
+                    <polyline points={map.path.map((p:any) => `${p.x},${p.y}`).join(' ')} strokeLinejoin="round" strokeLinecap="round" />
                 )}
             </svg>
         </div>

@@ -114,6 +114,8 @@ export interface TrackDefinition {
   name: string;
   totalCells: number;
   path: Point[];
+  svgPath?: string; // New: Optional SVG path for accurate tracks
+  rotation?: number; // New: Rotate track to fit landscape (e.g., 90)
   pitStops: number[];
   dangerZones: number[];
   drsZones: number[]; 
