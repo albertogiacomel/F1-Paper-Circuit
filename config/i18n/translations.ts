@@ -1,3 +1,4 @@
+
 import { Language, TranslationKey } from '../../types/index';
 
 export const TRANSLATIONS: Record<Language, Record<TranslationKey, string>> = {
@@ -43,6 +44,8 @@ export const TRANSLATIONS: Record<Language, Record<TranslationKey, string>> = {
     rule_drs_desc: 'Attiva l\'ala mobile per scattare avanti di 2 caselle extra.',
     rule_win_title: 'VITTORIA',
     rule_win_desc: 'Completa tutti i giri previsti e taglia il traguardo per primo.',
+    rule_engine_title: 'ROTTURA MOTORE',
+    rule_engine_desc: 'Attenzione! Se fai tre 6 di fila, il motore esplode e vieni eliminato.',
     manual_dice_label: 'DADO FISICO',
     manual_dice_desc: 'Inserisci manualmente il valore del dado reale.',
     game_mode_label: 'MODALITÀ GARA',
@@ -103,6 +106,8 @@ export const TRANSLATIONS: Record<Language, Record<TranslationKey, string>> = {
     rule_drs_desc: 'Open your rear wing to boost forward 2 extra spaces.',
     rule_win_title: 'WINNING',
     rule_win_desc: 'Complete all required laps and cross the finish line first.',
+    rule_engine_title: 'ENGINE FAILURE',
+    rule_engine_desc: 'Warning! Rolling three 6s in a row blows your engine and eliminates you.',
     manual_dice_label: 'PHYSICAL DICE',
     manual_dice_desc: 'Manually input the value from your real dice.',
     game_mode_label: 'RACE MODE',

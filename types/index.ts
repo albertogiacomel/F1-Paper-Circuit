@@ -1,3 +1,4 @@
+
 export type PlayerId = 1 | 2;
 export type GameMode = 'PVP' | 'AI' | null;
 export type Language = 'it' | 'en';
@@ -46,6 +47,8 @@ export type TranslationKey =
   | 'rule_drs_desc'
   | 'rule_win_title'
   | 'rule_win_desc'
+  | 'rule_engine_title'
+  | 'rule_engine_desc'
   | 'manual_dice_label'
   | 'manual_dice_desc'
   | 'game_mode_label'

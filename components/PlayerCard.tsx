@@ -110,7 +110,7 @@ export function PlayerCard({ player, isActive, isWinner, language, isDarkMode, o
                   `}
                 >
                   <div className="w-12 h-8 shrink-0">
-                    <F1CarIcon color={c.hex} borderColor={c.borderHex} />
+                    <F1CarIcon color={c.hex} borderColor={c.borderHex} className="w-full h-full" />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className={`text-xs font-black uppercase truncate ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{c.id}</span>

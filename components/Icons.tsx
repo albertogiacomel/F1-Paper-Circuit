@@ -1,7 +1,15 @@
 import React from 'react';
 
-export const F1CarIcon = ({ color, borderColor, className = "" }: { color: string, borderColor: string, className?: string }) => (
-  <svg viewBox="0 0 50 30" className={`w-full h-full ${className}`} style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))' }}>
+interface F1CarIconProps extends React.SVGProps<SVGSVGElement> {
+  color: string;
+  borderColor: string;
+  className?: string;
+  width?: number | string;
+  height?: number | string;
+}
+
+export const F1CarIcon = ({ color, borderColor, className = "", ...props }: F1CarIconProps) => (
+  <svg viewBox="0 0 50 30" className={className} style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))' }} {...props}>
     <g transform="translate(0, 0)">
         <rect x="0" y="5" width="8" height="20" rx="2" fill={borderColor} />
         <path d="M 10 10 L 45 12 L 48 15 L 45 18 L 10 20 Z" fill={color} stroke={borderColor} strokeWidth="2" />

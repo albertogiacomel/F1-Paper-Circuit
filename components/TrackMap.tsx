@@ -69,22 +69,6 @@ export function TrackMap({ p1, p2, winner, isDarkMode, language, map }: TrackMap
   const p1Visual = getPositionInfo(visualPos1);
   const p2Visual = getPositionInfo(visualPos2);
 
-  const trackAnalysis = useMemo(() => {
-    const heavyBraking: number[] = [];
-    for(let i=0; i<TRACK_PATH.length; i++) {
-        const prev = TRACK_PATH[i === 0 ? TRACK_PATH.length -1 : i-1];
-        const curr = TRACK_PATH[i];
-        const next = TRACK_PATH[i === TRACK_PATH.length -1 ? 0 : i+1];
-        const angle1 = Math.atan2(curr.y - prev.y, curr.x - prev.x);
-        const angle2 = Math.atan2(next.y - curr.y, next.x - curr.x);
-        let diff = angle2 - angle1;
-        while (diff <= -Math.PI) diff += 2*Math.PI;
-        while (diff > Math.PI) diff -= 2*Math.PI;
-        if (Math.abs(diff * (180/Math.PI)) > 35) heavyBraking.push(i);
-    }
-    return { heavyBraking };
-  }, [TRACK_PATH]);
-
   const bounds = useMemo(() => {
     const xs = TRACK_PATH.map(p => p.x); const ys = TRACK_PATH.map(p => p.y);
     return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
@@ -103,14 +87,14 @@ export function TrackMap({ p1, p2, winner, isDarkMode, language, map }: TrackMap
   const pointsString = TRACK_PATH.map(p => { const c = getCoord(p); return `${c.x},${c.y}`; }).join(' ');
   const closedPointsString = `${pointsString} ${getCoord(TRACK_PATH[0]).x},${getCoord(TRACK_PATH[0]).y}`;
   const iconSize = 40; const iconOffset = iconSize / 2;
-  const startAngle = TRACK_PATH.length > 1 ? getAngle(TRACK_PATH[0], TRACK_PATH[1]) + 90 : 0;
+  // Calculate angle of the first segment
+  const startAngle = TRACK_PATH.length > 1 ? getAngle(TRACK_PATH[0], TRACK_PATH[1]) : 0;
 
   /**
    * Car dimension logic:
-   * Further reducing size by 80% from previous 3.5.
-   * New desired width = 3.5 * 0.2 = 0.7.
+   * Fixed car size to be visible on track (width ~24 units relative to 70 unit track width)
    */
-  const carWidthDesired = 0.7;
+  const carWidthDesired = 24;
   const carScale = carWidthDesired / 30; 
   const carLength = 50 * carScale;
   const carWidth = 30 * carScale;
@@ -124,9 +108,26 @@ export function TrackMap({ p1, p2, winner, isDarkMode, language, map }: TrackMap
   const p1SideOffset = collision ? -15 : 0;
   const p2SideOffset = collision ? 15 : 0;
 
+  // Staggered Start Grid Logic
+  const getGridOffset = (playerId: number, pos: number, laps: number) => {
+    // If at the start line (pos 0) and on lap 1, shift back to simulate grid
+    if (pos === 0 && laps === 1) {
+      // Return the same offset for both players to place them side-by-side
+      return -40; 
+    }
+    return 0;
+  };
+
+  const p1GridOffset = getGridOffset(1, visualPos1, p1.laps);
+  const p2GridOffset = getGridOffset(2, visualPos2, p2.laps);
+
   // Final rendering offsets (SVG Y-axis relative to track center line)
-  const p1Offset = p1SideOffset - (carWidth / 2);
-  const p2Offset = p2SideOffset - (carWidth / 2);
+  const p1OffsetY = p1SideOffset - (carWidth / 2);
+  const p2OffsetY = p2SideOffset - (carWidth / 2);
+  
+  // Longitudinal offsets (SVG X-axis relative to track center line)
+  const p1OffsetX = (-carLength / 2) + p1GridOffset;
+  const p2OffsetX = (-carLength / 2) + p2GridOffset;
 
   return (
     <div className="w-full h-full overflow-hidden flex items-center justify-center">
@@ -175,18 +176,36 @@ export function TrackMap({ p1, p2, winner, isDarkMode, language, map }: TrackMap
 
         {TRACK_PATH.length > 0 && (
           <g transform={`translate(${getCoord(TRACK_PATH[0]).x}, ${getCoord(TRACK_PATH[0]).y}) rotate(${startAngle})`}>
+             {/* Checkered Line */}
              <rect x="-15" y={-(trackWidth/2)} width="30" height={trackWidth} fill="url(#checkered)" stroke="white" strokeWidth="2" />
+             
+             {/* Starting Grid Slots - Side by Side Visualization */}
+             {/* Slot 1 (Left/Top) */}
+             <rect x="-65" y="-30" width="45" height="30" rx="4" 
+                   fill="none" stroke="white" strokeWidth="2" strokeDasharray="5 5" opacity="0.6" />
+             <text x="-80" y="-15" fill="white" fontSize="12" fontWeight="bold" textAnchor="middle" dominantBaseline="middle" opacity="0.8">P1</text>
+
+             {/* Slot 2 (Right/Bottom) */}
+             <rect x="-65" y="0" width="45" height="30" rx="4" 
+                   fill="none" stroke="white" strokeWidth="2" strokeDasharray="5 5" opacity="0.6" />
+             <text x="-80" y="15" fill="white" fontSize="12" fontWeight="bold" textAnchor="middle" dominantBaseline="middle" opacity="0.8">P2</text>
           </g>
         )}
 
-        <g style={{ transition: 'all 0.3s cubic-bezier(0.25, 1, 0.5, 1)', transform: `translate(${p1Visual.x * gridSize}px, ${p1Visual.y * gridSize}px) rotate(${p1Visual.angle}deg)` }}>
-           <g transform={`translate(${-carLength/2}, ${p1Offset}) scale(${carScale})`}> 
-              <F1CarIcon color={p1.hexColor} borderColor={p1.hexBorderColor} />
+        <g 
+          style={{ transition: 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)' }}
+          transform={`translate(${p1Visual.x * gridSize}, ${p1Visual.y * gridSize}) rotate(${p1Visual.angle})`}
+        >
+           <g transform={`translate(${p1OffsetX}, ${p1OffsetY}) scale(${carScale})`}> 
+              <F1CarIcon color={p1.hexColor} borderColor={p1.hexBorderColor} width={50} height={30} />
            </g>
         </g>
-        <g style={{ transition: 'all 0.3s cubic-bezier(0.25, 1, 0.5, 1)', transform: `translate(${p2Visual.x * gridSize}px, ${p2Visual.y * gridSize}px) rotate(${p2Visual.angle}deg)` }}>
-          <g transform={`translate(${-carLength/2}, ${p2Offset}) scale(${carScale})`}>
-            <F1CarIcon color={p2.hexColor} borderColor={p2.hexBorderColor} />
+        <g 
+          style={{ transition: 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)' }}
+          transform={`translate(${p2Visual.x * gridSize}, ${p2Visual.y * gridSize}) rotate(${p2Visual.angle})`}
+        >
+          <g transform={`translate(${p2OffsetX}, ${p2OffsetY}) scale(${carScale})`}>
+            <F1CarIcon color={p2.hexColor} borderColor={p2.hexBorderColor} width={50} height={30} />
           </g>
         </g>
       </svg>

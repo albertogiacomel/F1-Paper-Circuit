@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Dice5, Zap, AlertTriangle, Wrench, Trophy, Move, RotateCcw } from 'lucide-react';
+import { X, Dice5, Zap, AlertTriangle, Wrench, Trophy, Move, RotateCcw, Flame } from 'lucide-react';
 import { Language } from '../types/index';
 import { TRANSLATIONS } from '../config/i18n/translations';
 
@@ -18,6 +18,7 @@ export function HelpModal({ isOpen, onClose, language, isDarkMode }: HelpModalPr
   const rules = [
     { icon: <Move className="text-blue-500" />, title: t.rule_movement_title, desc: t.rule_movement_desc },
     { icon: <Dice5 className="text-green-500" />, title: t.rule_six_title, desc: t.rule_six_desc },
+    { icon: <Flame className="text-orange-500" />, title: t.rule_engine_title, desc: t.rule_engine_desc },
     { icon: <Wrench className="text-yellow-600" />, title: t.rule_pit_title, desc: t.rule_pit_desc },
     { icon: <AlertTriangle className="text-red-500" />, title: t.rule_danger_title, desc: t.rule_danger_desc },
     { icon: <Zap className="text-cyan-500" />, title: t.rule_drs_title, desc: t.rule_drs_desc },
