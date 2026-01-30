@@ -275,8 +275,8 @@ export function TrackMap({ p1, p2, winner, isDarkMode, language, map }: TrackMap
               {isDanger && <AlertTriangle x={x - iconOffset} y={y - iconOffset} width={iconSize} height={iconSize} className="text-red-600" />}
               {isDRS && <Zap x={x - iconOffset} y={y - iconOffset} width={iconSize} height={iconSize} className="text-cyan-600" />}
               
-              { !isStart && !isSvgTrack && <text x={x} y={y} dominantBaseline="central" textAnchor="middle" fontSize="6" fontWeight="900" fill={isDarkMode ? "#ffffff" : "#0f172a"}>{index}</text>}
-              { !isStart && isSvgTrack && (index % 1 === 0) && (
+              { !isStart && !isDanger && !isDRS && !isSvgTrack && <text x={x} y={y} dominantBaseline="central" textAnchor="middle" fontSize="6" fontWeight="900" fill={isDarkMode ? "#ffffff" : "#0f172a"}>{index}</text>}
+              { !isStart && !isDanger && !isDRS && isSvgTrack && (index % 1 === 0) && (
                   <text x={x} y={y} dominantBaseline="central" textAnchor="middle" fontSize={r * 0.9} fontWeight="900" fill={isDarkMode ? "#ffffff" : "#0f172a"} className="pointer-events-none select-none">
                       {index}
                   </text>
