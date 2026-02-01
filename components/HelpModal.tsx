@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { X, Dice5, Zap, AlertTriangle, Wrench, Trophy, Move, RotateCcw, Flame } from 'lucide-react';
 import { Language } from '../types/index';
-import { TRANSLATIONS } from '../config/i18n/translations';
+import { TRANSLATIONS } from '../gameConfig/i18n/translations';
 
 interface HelpModalProps {
   isOpen: boolean;

@@ -2,9 +2,9 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, height=device-height" />
     <title>F1 PAPER CIRCUIT</title>
-    <!-- Keep Tailwind CDN for specific config injection, though usually bundled in Vite -->
+    <!-- Keep Tailwind CDN for specific config injection -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -26,6 +26,7 @@
     <style>
       body {
         font-family: 'Titillium Web', sans-serif;
+        overscroll-behavior: none; /* Prevent bounce effect on mobile */
       }
       .font-display {
         font-family: 'Titillium Web', sans-serif;
@@ -61,31 +62,35 @@
         scrollbar-width: none;
         -ms-overflow-style: none;
         overflow: hidden;
+        height: 100%;
+        width: 100%;
+        position: fixed; /* Prevent scrolling of body */
       }
       
       .overflow-y-auto {
         scrollbar-width: none;
         -ms-overflow-style: none;
+        -webkit-overflow-scrolling: touch;
       }
       .overflow-y-auto::-webkit-scrollbar {
         display: none;
       }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "vite": "https://esm.sh/vite@^7.3.1"
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react": "https://esm.sh/react@19.0.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.460.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/"
   }
 }
 </script>
 </head>
   <body class="bg-slate-50 text-slate-900 dark:bg-[#15151e] dark:text-slate-100 transition-colors duration-300">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

@@ -1,9 +1,10 @@
+
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { X, Globe, Map as MapIcon, RotateCw, Info, Dice6, Bot, User } from 'lucide-react';
 import { Language, GameMode } from '../types/index';
-import { TRANSLATIONS } from '../config/i18n/translations';
-import { MAPS } from '../config/maps/index';
-import { LAP_OPTIONS, MAP_ORDER } from '../config/constants';
+import { TRANSLATIONS } from '../gameConfig/i18n/translations';
+import { MAPS } from '../gameConfig/maps/index';
+import { LAP_OPTIONS, MAP_ORDER } from '../gameConfig/constants';
 
 interface SettingsModalProps {
   isOpen: boolean;

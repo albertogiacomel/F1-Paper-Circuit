@@ -2,7 +2,7 @@ import { PlayerState, TeamColor } from '../types/index';
 import { ACTIVE_MAP } from './maps/index';
 
 // Game Configuration from Active Map
-export const TOTAL_CELLS = ACTIVE_MAP.path.length;
+export const TOTAL_CELLS = ACTIVE_MAP.totalCells;
 export const PIT_STOPS = ACTIVE_MAP.pitStops;
 export const DANGER_ZONES = ACTIVE_MAP.dangerZones;
 export const DRS_ZONES = ACTIVE_MAP.drsZones;

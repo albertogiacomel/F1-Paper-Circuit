@@ -1,7 +1,8 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { PlayerId, GameMode, PlayerState, GameLog, EventKey, TranslationKey, TrackDefinition } from '../types/index';
-import { INITIAL_PLAYER_1, INITIAL_PLAYER_2, AVAILABLE_COLORS, DEFAULT_LAPS, MAP_ORDER } from '../config/constants';
-import { MAPS } from '../config/maps/index';
+import { INITIAL_PLAYER_1, INITIAL_PLAYER_2, AVAILABLE_COLORS, DEFAULT_LAPS, MAP_ORDER } from '../gameConfig/constants';
+import { MAPS } from '../gameConfig/maps/index';
 import { calculateMove } from './gameEngine';
 
 const STORAGE_KEY = 'f1_paper_save_v3';
@@ -49,12 +50,13 @@ export function useGame() {
     eventKey: EventKey;
   } | null>(null);
 
-  const addLog = useCallback((key: TranslationKey, args: Record<string, string|number> = {}, type: GameLog['type'] = 'info') => {
+  const addLog = useCallback((key: TranslationKey, args: Record<string, string|number> = {}, type: GameLog['type'] = 'info', playerColor?: string) => {
     setLogs(prev => [...prev, { 
         id: Math.random().toString(36), 
         translationKey: key, 
         args, 
-        type 
+        type,
+        playerColor
     }]);
   }, []);
 
@@ -105,7 +107,7 @@ export function useGame() {
     const currentPlayer = turn === 1 ? p1 : p2;
     if (currentPlayer.skipTurn) {
         const timer = setTimeout(() => {
-            addLog('log_skip_turn', { player: currentPlayer.name }, 'warning');
+            addLog('log_skip_turn', { player: currentPlayer.name }, 'warning', currentPlayer.hexColor);
             const updateFn = turn === 1 ? setP1 : setP2;
             updateFn(prev => ({ ...prev, skipTurn: false }));
             setTurn(prev => prev === 1 ? 2 : 1);
@@ -172,7 +174,7 @@ export function useGame() {
   const processRollResult = (roll: number) => {
     const currentPlayer = turn === 1 ? p1 : p2;
     const result = calculateMove(currentPlayer, roll, activeMap, totalLaps);
-    addLog(result.translationKey, result.logArgs, result.logType);
+    addLog(result.translationKey, result.logArgs, result.logType, currentPlayer.hexColor);
     setPendingUpdate({
       playerId: turn,
       landedPosition: result.landedPosition,

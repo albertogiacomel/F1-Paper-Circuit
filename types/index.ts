@@ -6,71 +6,15 @@ export type Language = 'it' | 'en';
 export type LogType = 'info' | 'success' | 'danger' | 'warning';
 
 export type TranslationKey = 
-  | 'title'
-  | 'start_pvp'
-  | 'start_pvp_desc'
-  | 'start_ai'
-  | 'start_ai_desc'
-  | 'reset'
-  | 'play_again'
-  | 'next_race'
-  | 'winner'
-  | 'wins'
-  | 'race_finished'
-  | 'rolling'
-  | 'ai_thinking'
-  | 'roll_dice'
-  | 'enter_dice'
-  | 'race_telemetry'
-  | 'waiting_start'
-  | 'pos'
-  | 'laps'
-  | 'last_roll'
-  | 'your_turn'
-  | 'settings'
-  | 'language'
-  | 'close'
-  | 'start_finish_label'
-  | 'settings_title'
-  | 'total_laps'
-  | 'version'
-  | 'help_title'
-  | 'rule_movement_title'
-  | 'rule_movement_desc'
-  | 'rule_six_title'
-  | 'rule_six_desc'
-  | 'rule_pit_title'
-  | 'rule_pit_desc'
-  | 'rule_danger_title'
-  | 'rule_danger_desc'
-  | 'rule_drs_title'
-  | 'rule_drs_desc'
-  | 'rule_win_title'
-  | 'rule_win_desc'
-  | 'rule_engine_title'
-  | 'rule_engine_desc'
-  | 'manual_dice_label'
-  | 'manual_dice_desc'
-  | 'game_mode_label'
-  | 'select_value'
-  // Log Keys
-  | 'log_start'
-  | 'log_roll'
-  | 'log_roll_6'
-  | 'log_lap_complete'
-  | 'log_finish'
-  | 'log_pitstop'
-  | 'log_danger'
-  | 'log_move_back'
-  | 'log_drs'
-  | 'log_skip_turn'
-  | 'log_engine_failure';
+  | 'title' | 'start_pvp' | 'start_pvp_desc' | 'start_ai' | 'start_ai_desc' | 'reset' | 'play_again' | 'next_race' | 'winner' | 'wins' | 'race_finished' | 'rolling' | 'ai_thinking' | 'roll_dice' | 'enter_dice' | 'race_telemetry' | 'waiting_start' | 'pos' | 'laps' | 'last_roll' | 'your_turn' | 'settings' | 'language' | 'close' | 'start_finish_label' | 'settings_title' | 'total_laps' | 'version' | 'help_title' | 'rule_movement_title' | 'rule_movement_desc' | 'rule_six_title' | 'rule_six_desc' | 'rule_pit_title' | 'rule_pit_desc' | 'rule_danger_title' | 'rule_danger_desc' | 'rule_drs_title' | 'rule_drs_desc' | 'rule_win_title' | 'rule_win_desc' | 'rule_engine_title' | 'rule_engine_desc' | 'manual_dice_label' | 'manual_dice_desc' | 'game_mode_label' | 'select_value'
+  | 'log_start' | 'log_roll' | 'log_roll_6' | 'log_lap_complete' | 'log_finish' | 'log_pitstop' | 'log_danger' | 'log_move_back' | 'log_drs' | 'log_skip_turn' | 'log_engine_failure';
 
 export interface GameLog {
   id: string;
   translationKey: TranslationKey; 
   args?: Record<string, string | number>; 
   type: LogType;
+  playerColor?: string; // Hex color del player
 }
 
 export interface PlayerState {
@@ -114,11 +58,11 @@ export interface TrackDefinition {
   name: string;
   totalCells: number;
   path: Point[];
-  svgPath?: string; // New: Optional SVG path for accurate tracks
-  rotation?: number; // New: Rotate track to fit landscape (e.g., 90)
+  svgPath: string;
   pitStops: number[];
   dangerZones: number[];
-  drsZones: number[]; 
+  drsZones: number[];
+  complete: boolean; // Flag per tracciati già elaborati
 }
 
 export interface TeamColor {

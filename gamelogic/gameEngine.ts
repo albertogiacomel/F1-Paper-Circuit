@@ -9,8 +9,8 @@ export const calculateMove = (
   track: TrackDefinition,
   totalRaceLaps: number
 ): MoveResult => {
-  // Use the actual path length
-  const trackLength = track.path.length;
+  // Use the defined total cells from config
+  const trackLength = track.totalCells;
   
   // Calculate raw position (can be greater than trackLength)
   const rawLandedPosition = currentPlayer.position + roll;
@@ -50,7 +50,7 @@ export const calculateMove = (
       // ENGINE BLOWN RULE
       if (consecutiveSixes >= 3) {
           return {
-              landedPosition: currentPlayer.position, // Stays put (or doesn't matter, lost)
+              landedPosition: currentPlayer.position, 
               newPosition: currentPlayer.position,
               newLaps: currentPlayer.laps,
               rollValue: roll,
@@ -77,7 +77,7 @@ export const calculateMove = (
       translationKey: 'log_finish',
       logArgs: { player: currentPlayer.name },
       logType: 'success',
-      extraTurn: false, // Win cancels extra turn
+      extraTurn: false, 
       skipTurn: false,
       eventKey: 'FINISH',
       consecutiveSixes
@@ -86,7 +86,6 @@ export const calculateMove = (
   
   // 1.5 Check Lap Complete (but not race finish)
   if (lapsGained > 0) {
-      // Don't overwrite log if it was a 6, unless it's a critical lap update?
       if (translationKey !== 'log_roll_6') {
         translationKey = 'log_lap_complete';
         logType = 'success';
@@ -97,45 +96,35 @@ export const calculateMove = (
 
   // 2. Check Special Tiles based on LANDED position (Wrapped)
   if (track.pitStops.includes(landedPosition)) {
-    // Pit Stop Logic: Stop for a turn
     translationKey = 'log_pitstop';
     logType = 'warning'; 
-    extraTurn = false; // Penalty overrides the 6 rule!
+    extraTurn = false; 
     skipTurn = true; 
     eventKey = 'PIT_STOP';
     
   } else if (track.dangerZones.includes(landedPosition)) {
-    // Danger Zone Logic
     translationKey = 'log_danger';
     logType = 'danger';
     
-    // Move BACK logic with wrapping
     let backPos = landedPosition - 1;
     if (backPos < 0) {
         backPos = trackLength - 1; 
     }
     newPosition = backPos;
     eventKey = 'DANGER_ZONE';
-    // If you rolled a 6 but hit danger, you usually still get the extra turn 
-    // unless the game is very punitive. Let's keep extraTurn = true if roll was 6.
 
   } else if (track.drsZones && track.drsZones.includes(landedPosition)) {
-    // DRS Zone Logic - Boost Forward
     translationKey = 'log_drs';
     logType = 'success'; 
     
-    // Boost movement by 2
     let drsPos = landedPosition + 2;
-    // Check if DRS pushes across finish line
     if (drsPos >= trackLength) {
         drsPos = drsPos % trackLength;
-        if (drsPos < landedPosition) { // Wrapped around
-             newLaps += 1;
-             if (newLaps > totalRaceLaps) {
-                 eventKey = 'FINISH';
-                 translationKey = 'log_finish';
-                 extraTurn = false; // Win cancels extra turn
-             }
+        newLaps += 1;
+        if (newLaps > totalRaceLaps) {
+            eventKey = 'FINISH';
+            translationKey = 'log_finish';
+            extraTurn = false;
         }
     }
     newPosition = drsPos;

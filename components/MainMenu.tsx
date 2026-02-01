@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Flag, User, Bot } from 'lucide-react';
 import { GameMode, Language } from '../types/index';
-import { TRANSLATIONS } from '../config/i18n/translations';
+import { TRANSLATIONS } from '../gameConfig/i18n/translations';
 
 interface MainMenuProps {
   onStart: (mode: GameMode) => void;
