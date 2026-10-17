@@ -1,3 +1,4 @@
+import {useGamePreferences,GameKitControls} from './shared/game-kit';
 
 import React, { useState, useEffect } from 'react';
 import { RotateCcw, Trophy, Dice5, Settings, Maximize, Minimize, Moon, Sun, ArrowRight, HelpCircle, Activity, X } from 'lucide-react';
@@ -23,12 +24,12 @@ const getContrastYIQ = (hexcolor: string) => {
 };
 
 export default function App() {
-  const [language, setLanguage] = useState<Language>('it');
+  const {preferences: kitPreferences, effectiveTheme} = useGamePreferences('f1-paper-circuit');
+  const language = kitPreferences.language as Language;
+  const isDarkMode = effectiveTheme === 'dark';
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isLogsOpenMobile, setIsLogsOpenMobile] = useState(false);
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const { 
     gameMode, 
@@ -56,27 +57,6 @@ export default function App() {
     setManualDiceEnabled
   } = useGame();
 
-  const toggleFullScreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-      });
-      setIsFullScreen(true);
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-        setIsFullScreen(false);
-      }
-    }
-  };
-
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
-
-  useEffect(() => {
-    if (isDarkMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-  }, [isDarkMode]);
-
   const t = TRANSLATIONS[language];
   const isAiThinking = gameMode === 'AI' && turn === 2 && !winner;
   const activePlayer = turn === 1 ? p1 : p2;
@@ -96,7 +76,6 @@ export default function App() {
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)}
         language={language}
-        setLanguage={setLanguage}
         isDarkMode={isDarkMode}
         currentMapId={activeMap.id}
         onMapChange={changeMap}
@@ -157,11 +136,8 @@ export default function App() {
                  </button>
              )}
             <button onClick={() => setIsHelpOpen(true)} className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}><HelpCircle size={18} className="lg:w-6 lg:h-6" /></button>
-            <button onClick={toggleTheme} className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-yellow-400' : 'hover:bg-slate-100 text-slate-600'}`}>{isDarkMode ? <Sun size={18} className="lg:w-5 lg:h-5" /> : <Moon size={18} className="lg:w-5 lg:h-5" />}</button>
-            <button onClick={toggleFullScreen} className={`hidden sm:block p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-slate-100 text-slate-600'}`}>
-              {isFullScreen ? <Minimize size={18} className="lg:w-5 lg:h-5" /> : <Maximize size={18} className="lg:w-5 lg:h-5" />}
-            </button>
-            <button onClick={() => setIsSettingsOpen(true)} className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-slate-100 text-slate-600'}`}><Settings size={18} className="lg:w-5 lg:h-5" /></button>
+            <GameKitControls gameId="f1-paper-circuit" />
+            <button onClick={() => setIsSettingsOpen(true)} className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-slate-100 text-slate-600'}`}><Settings size={18} className="lg:w-5 lg:h-5" /><span className="text-xs">{language === 'it' ? 'Gara' : 'Race'}</span></button>
             {gameMode && <button onClick={() => resetGame()} className={`flex items-center gap-2 p-2 lg:px-4 lg:py-2 font-bold rounded-lg transition-colors ml-1 ${isDarkMode ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}><RotateCcw size={18} /><span className="hidden lg:inline text-sm">{t.reset}</span></button>}
           </div>
         </div>
@@ -211,6 +187,7 @@ export default function App() {
                       <div className={`text-center font-bold py-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t.race_finished}</div>
                   ) : (
                     <button 
+                      aria-label={`${isManualTurn ? t.enter_dice : t.roll_dice}: ${activePlayerName}`}
                       onClick={performRoll} 
                       disabled={isRolling || isAiThinking || (turn === 1 ? p1.skipTurn : p2.skipTurn)} 
                       style={rollButtonStyle}

@@ -5,8 +5,11 @@
   "source": "index.html",
   "scripts": {
     "start": "parcel",
-    "build": "parcel build",
-    "check": "tsc --noEmit"
+    "build": "node scripts/game-kit-check.mjs && parcel build",
+    "check": "tsc --noEmit",
+    "check:kit": "node scripts/game-kit-check.mjs",
+    "test:kit": "node --test scripts/game-kit-test.mjs",
+    "test:kit:browser": "node scripts/game-kit-browser-test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",

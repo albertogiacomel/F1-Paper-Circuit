@@ -1,6 +1,6 @@
 
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { X, Globe, Map as MapIcon, RotateCw, Info, Dice6, Bot, User } from 'lucide-react';
+import { X, Map as MapIcon, RotateCw, Info, Dice6, Bot, User } from 'lucide-react';
 import { Language, GameMode } from '../types/index';
 import { TRANSLATIONS } from '../gameConfig/i18n/translations';
 import { MAPS } from '../gameConfig/maps/index';
@@ -10,7 +10,6 @@ interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   language: Language;
-  setLanguage: (lang: Language) => void;
   isDarkMode: boolean;
   currentMapId: string;
   onMapChange: (mapId: string) => void;
@@ -85,7 +84,7 @@ const TrackPreview = ({ mapId }: { mapId: string }) => {
 };
 
 export function SettingsModal({ 
-  isOpen, onClose, language, setLanguage, isDarkMode, currentMapId, 
+  isOpen, onClose, language, isDarkMode, currentMapId,
   onMapChange, totalLaps, onLapsChange, manualDiceEnabled, setManualDiceEnabled,
   gameMode, onToggleMode
 }: SettingsModalProps) {
@@ -100,7 +99,7 @@ export function SettingsModal({
         ${isDarkMode ? 'bg-slate-800 border-2 border-slate-700 text-white' : 'bg-white border-2 border-slate-800 text-slate-900'}`}>
         
         <div className="flex justify-between items-center mb-6">
-          <h2 className="font-display text-2xl uppercase tracking-wide">{t.settings_title}</h2>
+          <h2 className="font-display text-2xl uppercase tracking-wide">{language === 'it' ? 'Configurazione gara' : 'Race setup'}</h2>
           <button onClick={onClose} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors">
             <X size={24} />
           </button>
@@ -207,17 +206,6 @@ export function SettingsModal({
 
           <hr className={`border-t-2 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`} />
 
-          {/* Language Switch */}
-          <div>
-            <label className="flex items-center gap-2 font-bold mb-3 text-lg">
-              <Globe size={20} />
-              {t.language}
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => setLanguage('it')} className={`py-3 px-4 rounded-xl font-bold border-2 transition-all ${language === 'it' ? 'bg-blue-600 text-white border-blue-700' : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700'}`}>Italiano 🇮🇹</button>
-              <button onClick={() => setLanguage('en')} className={`py-3 px-4 rounded-xl font-bold border-2 transition-all ${language === 'en' ? 'bg-blue-600 text-white border-blue-700' : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700'}`}>English 🇬🇧</button>
-            </div>
-          </div>
         </div>
 
         <div className="mt-8 flex justify-end">

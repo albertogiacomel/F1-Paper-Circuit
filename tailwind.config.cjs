@@ -1,0 +1,1 @@
+module.exports={darkMode:'class',content:['./*.{html,ts,tsx}','./components/**/*.{ts,tsx}','./gameConfig/**/*.{ts,tsx}'],theme:{extend:{fontFamily:{sans:['Titillium Web','sans-serif'],display:['Titillium Web','sans-serif'],mono:['JetBrains Mono','monospace']}}}};

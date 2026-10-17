@@ -1,3 +1,5 @@
+> Impostazioni e controlli condivisi: [integrazione Videogames Kit](docs/videogames-kit.md).
+
 # 🏎️ F1 Paper Circuit
 
 **F1 Paper Circuit** is a turn-based racing board game built with **React**, **TypeScript**, and **Tailwind CSS**. It simulates a race on graph paper where players roll dice to move, aiming to hit Pit Stops for bonuses while avoiding Danger Zones.
