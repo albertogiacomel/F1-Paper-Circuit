@@ -177,7 +177,7 @@ export default function App() {
               <div className="flex-none lg:w-[380px] xl:w-[420px] flex flex-col gap-2 lg:gap-4 lg:h-full lg:overflow-y-auto pb-safe">
                 
                 {/* Players & Dice Section */}
-                <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-4">
+                <div className="ag-equal-items grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-4">
                   <PlayerCard player={p1} isActive={turn === 1} isWinner={winner === 1} language={language} isDarkMode={isDarkMode} onNameChange={(name) => updatePlayerName(1, name)} onColorChange={(idx) => updatePlayerColor(1, idx)} totalLaps={totalLaps} />
                   <PlayerCard player={p2} isActive={turn === 2} isWinner={winner === 2} language={language} isDarkMode={isDarkMode} onNameChange={(name) => updatePlayerName(2, name)} onColorChange={(idx) => updatePlayerColor(2, idx)} totalLaps={totalLaps} />
                 </div>
