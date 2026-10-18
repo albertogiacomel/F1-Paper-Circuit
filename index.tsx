@@ -14,3 +14,9 @@ root.render(
     <App />
   </React.StrictMode>
 );
+// Keep the locally served privacy integration outside Parcel's hashed asset graph.
+const privacyScript = document.createElement('script');
+privacyScript.src = '/site-privacy/runtime.js';
+privacyScript.defer = true;
+privacyScript.setAttribute('data-site-profile', 'game');
+document.body.appendChild(privacyScript);
