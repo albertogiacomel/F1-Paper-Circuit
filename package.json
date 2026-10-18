@@ -2,15 +2,16 @@
   "name": "f1-paper-circuit",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "source": "index.html",
   "scripts": {
     "start": "parcel",
-    "build": "node scripts/site-privacy-check.mjs && node scripts/game-kit-check.mjs && parcel build && node scripts/site-privacy-copy.mjs",
+    "build": "node scripts/site-privacy-check.js && node scripts/game-kit-check.js && parcel build && node scripts/site-privacy-copy.js",
     "check": "tsc --noEmit",
-    "check:kit": "node scripts/game-kit-check.mjs",
-    "test:kit": "node --test scripts/game-kit-test.mjs",
-    "test:kit:browser": "node scripts/game-kit-browser-test.mjs",
-    "check:privacy": "node scripts/site-privacy-check.mjs"
+    "check:kit": "node scripts/game-kit-check.js",
+    "test:kit": "node --test scripts/game-kit-test.js",
+    "test:kit:browser": "node scripts/game-kit-browser-test.js",
+    "check:privacy": "node scripts/site-privacy-check.js"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",
